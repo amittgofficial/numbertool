@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Number Cleaner Tool</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to bottom right, #e0f7fa, #e1bee7);
+      color: #333;
+    }
+
+    h2 {
+      text-align: center;
+      color: #4a148c;
+    }
+
+    textarea {
+      width: 100%;
+      height: 150px;
+      padding: 12px;
+      font-size: 16px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+      resize: vertical;
+    }
+
+    button {
+      background-color: #7b1fa2;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      margin-top: 15px;
+      border-radius: 8px;
+      font-size: 16px;
+      width: 100%;
+      cursor: pointer;
+      transition: 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #4a148c;
+    }
+
+    .output, .duplicates, .invalids {
+      background: white;
+      padding: 15px;
+      margin-top: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .label {
+      font-weight: bold;
+      margin-bottom: 8px;
+      display: block;
+      color: #6a1b9a;
+    }
+
+    .copy-btn {
+      float: right;
+      background: #26a69a;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    ol {
+      padding-left: 20px;
+      margin-top: 10px;
+    }
+
+    @media (max-width: 600px) {
+      .copy-btn {
+        float: none;
+        display: block;
+        width: 100%;
+        margin-top: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h2>📱 Number Cleaner Tool</h2>
+
+  <textarea id="numberInput" placeholder="Paste numbers here..."></textarea>
+  <button onclick="processNumbers()">🧹 Clean Numbers</button>
+
+  <div class="output">
+    <span class="label">
+      ✅ Cleaned Numbers: <span id="cleanCount">0</span>
+    </span>
+    <button class="copy-btn" onclick="copyToClipboard()">📋 Copy Clean Numbers</button>
+    <input type="hidden" id="cleanOutput">
+  </div>
+
+  <div class="duplicates">
+    <span class="label">❌ Duplicate Numbers (<span id="dupCount">0</span>):</span>
+    <ol id="duplicateOutput"></ol>
+  </div>
+
+  <div class="invalids">
+    <span class="label">🚫 Invalid Numbers (<span id="invalidCount">0</span>):</span>
+    <p id="invalidOutput"></p>
+  </div>
+
+  <script>
+    function processNumbers() {
+      const input = document.getElementById("numberInput").value;
+      const rawNumbers = input.split(/[\s,]+/);
+      const valid = [];
+      const invalid = [];
+      const seen = new Set();
+      const duplicates = new Set();
+      const finalCleaned = [];
+
+      for (let num of rawNumbers) {
+        num = num.replace(/\D/g, ""); // Remove non-digits
+        if (num.length === 10) {
+          if (seen.has(num)) {
+            duplicates.add(num);
+          } else {
+            seen.add(num);
+            finalCleaned.push(num);
+          }
+        } else if (num.length > 0) {
+          invalid.push(num);
+        }
+      }
+
+      document.getElementById("cleanOutput").value = finalCleaned.join(",");
+      document.getElementById("cleanCount").textContent = finalCleaned.length;
+
+      // Duplicate numbers in ordered list
+      const dupList = Array.from(duplicates);
+      const dupOutput = document.getElementById("duplicateOutput");
+      dupOutput.innerHTML = '';
+      dupList.forEach(num => {
+        const li = document.createElement("li");
+        li.textContent = num;
+        dupOutput.appendChild(li);
+      });
+      document.getElementById("dupCount").textContent = dupList.length;
+
+      // Invalid numbers
+      document.getElementById("invalidOutput").textContent = invalid.join(", ");
+      document.getElementById("invalidCount").textContent = invalid.length;
+    }
+
+    function copyToClipboard() {
+      const text = document.getElementById("cleanOutput").value;
+      navigator.clipboard.writeText(text).then(() => {
+        alert("✅ Clean numbers copied to clipboard!");
+      });
+    }
+  </script>
+
+</body>
+</html>
