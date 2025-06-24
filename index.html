@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Number Cleaner Tool</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f3f4f6;
+    }
+    textarea {
+      width: 100%;
+      height: 150px;
+      padding: 10px;
+      font-size: 16px;
+    }
+    button {
+      margin-top: 10px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .output, .duplicates, .invalids {
+      background: #fff;
+      padding: 10px;
+      margin-top: 15px;
+      border-radius: 8px;
+    }
+    .copy-btn {
+      float: right;
+      cursor: pointer;
+      background: #10b981;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 5px;
+    }
+    .label {
+      font-weight: bold;
+      margin-top: 10px;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>📱 Number Cleaner Tool</h2>
+
+  <textarea id="numberInput" placeholder="Paste numbers here..."></textarea>
+  <br>
+  <button onclick="processNumbers()">🧹 Clean Numbers</button>
+
+  <div class="output">
+    <span class="label">✅ Clean Numbers (<span id="cleanCount">0</span>):</span>
+    <button class="copy-btn" onclick="copyToClipboard()">📋 Copy</button>
+    <p id="cleanOutput"></p>
+  </div>
+
+  <div class="duplicates">
+    <span class="label">❌ Duplicate Numbers (<span id="dupCount">0</span>):</span>
+    <p id="duplicateOutput"></p>
+  </div>
+
+  <div class="invalids">
+    <span class="label">🚫 Invalid Numbers (<span id="invalidCount">0</span>):</span>
+    <p id="invalidOutput"></p>
+  </div>
+
+  <script>
+    function processNumbers() {
+      const input = document.getElementById("numberInput").value;
+      const rawNumbers = input.split(/[\s,]+/);
+      const valid = [];
+      const invalid = [];
+      const seen = new Set();
+      const duplicates = new Set();
+      const finalCleaned = [];
+
+      for (let num of rawNumbers) {
+        num = num.replace(/\D/g, ""); // Remove non-digit
+        if (num.length === 10) {
+          if (seen.has(num)) {
+            duplicates.add(num);
+          } else {
+            seen.add(num);
+            finalCleaned.push(num);
+          }
+        } else if (num.length > 0) {
+          invalid.push(num);
+        }
+      }
+
+      document.getElementById("cleanOutput").textContent = finalCleaned.join(",");
+      document.getElementById("cleanCount").textContent = finalCleaned.length;
+
+      document.getElementById("duplicateOutput").textContent = Array.from(duplicates).join(", ");
+      document.getElementById("dupCount").textContent = duplicates.size;
+
+      document.getElementById("invalidOutput").textContent = invalid.join(", ");
+      document.getElementById("invalidCount").textContent = invalid.length;
+    }
+
+    function copyToClipboard() {
+      const text = document.getElementById("cleanOutput").textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        alert("Clean numbers copied!");
+      });
+    }
+  </script>
+
+</body>
+</html>
