@@ -354,7 +354,7 @@ function copyHeaderText() {
         const div = document.createElement("div");
         div.className = "history-item";
         div.innerHTML = `
-          <span><strong></strong> ${item.name}</span><b>
+          <b><span><strong>💫</strong> ${item.name}</span><b>
           <span><strong>🕛:</strong> ${item.date}</span><b>
           <span><strong>👍</strong> ${item.total}</span>
           <button class="copy-btn" onclick="navigator.clipboard.writeText('${item.numbers}'); showToast('✅ Copied!')">📋 Copy</button>
