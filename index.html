@@ -156,6 +156,11 @@
       max-width: 300px;
     }
 
+    #dupPreview {
+  color: red;
+  font-weight: bold;
+    }
+
     input#dateInput {
       width: 90%;
       padding: 10px;
@@ -207,7 +212,7 @@
   <div class="tab-content" id="dup">
     <span class="label">❌ Duplicate Numbers (<span id="dupCount">0</span>):</span>
     <textarea readonly id="dupPreview" style="height:100px; margin-top:10px;"></textarea>
-    <ol id="duplicateOutput"></ol>
+  
   </div>
 
   <div class="tab-content" id="inv">
@@ -282,14 +287,7 @@
     document.getElementById("dupCount").textContent = dupArray.length;
     document.getElementById("dupPreview").value = dupArray.join("\n");
 
-    const dupOutput = document.getElementById("duplicateOutput");
-    dupOutput.innerHTML = '';
-    dupArray.forEach(num => {
-      const li = document.createElement("li");
-      li.textContent = num;
-      dupOutput.appendChild(li);
-    });
-
+    
     document.getElementById("invalidOutput").textContent = invalid.join(", ");
     document.getElementById("invalidCount").textContent = invalid.length;
     document.getElementById("invPreview").value = invalid.join("\n");
