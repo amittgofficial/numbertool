@@ -355,9 +355,10 @@
       const div = document.createElement("div");
       div.className = "history-item";
       div.innerHTML = `
+      <b><span><strong>👍</strong> 
+      <span style="color:#d63384; font-weight:bold;">${item.total}</span><br>
         <b><span><strong>💫</strong> ${item.name}</span><b>
         <span><strong>🕛:</strong> ${item.date}</span><b>
-        <span><strong>👍</strong> ${item.total}</span>
         <button class="copy-btn" onclick="navigator.clipboard.writeText('${item.numbers}'); showToast('✅ Copied!')">📋 Copy</button>
       `;
       container.appendChild(div);
