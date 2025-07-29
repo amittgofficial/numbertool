@@ -318,29 +318,39 @@
   }
 
   function saveNumbers() {
-    const nameLine = document.getElementById("numberInput").value.split('\n').find(line => line.trim().endsWith(':'));
-    const name = nameLine ? nameLine.replace(':', '').trim() : 'Unnamed';
-    const numbers = document.getElementById("cleanOutput").value;
-    const date = document.getElementById("dateInput").value.trim();
+  const nameLine = document.getElementById("numberInput").value.split('\n').find(line => line.trim().endsWith(':'));
+  const name = nameLine ? nameLine.replace(':', '').trim() : 'Unnamed';
+  const numbers = document.getElementById("cleanOutput").value;
+  let date = document.getElementById("dateInput").value.trim();
 
-    if (!numbers) return showToast("⚠️ Clean first.");
-    if (!date) return showToast("❗ Date required.");
+  if (!numbers) return showToast("⚠️ Clean first.");
 
-    const entry = {
-      name,
-      date,
-      numbers,
-      total: numbers.split(',').length
-    };
+  // ✅ Auto fill today's date if not entered
+  if (!date) {
+  const today = new Date();
+  const day = today.getDate();
+  const monthNames = ["January", "February", "March", "April", "May", "June", 
+                      "July", "August", "September", "October", "November", "December"];
+  const month = monthNames[today.getMonth()];
+  const year = today.getFullYear();
+  date = `${day} ${month}`;  // 👉 Like "29 July 2025"
+}
 
-    const history = JSON.parse(localStorage.getItem("history") || "[]");
-    history.unshift(entry);
-    localStorage.setItem("history", JSON.stringify(history));
-    showToast("✅ Saved!");
-    document.getElementById("popup").style.display = "none";
-    loadHistory();
+  const entry = {
+    name,
+    date,
+    numbers,
+    total: numbers.split(',').length
+  };
+
+  const history = JSON.parse(localStorage.getItem("history") || "[]");
+  history.unshift(entry);
+  localStorage.setItem("history", JSON.stringify(history));
+  showToast("✅ Saved!");
+  document.getElementById("popup").style.display = "none";
+  loadHistory();
   }
-
+  
   function loadHistory() {
     const history = JSON.parse(localStorage.getItem("history") || "[]");
     const container = document.getElementById("historyList");
