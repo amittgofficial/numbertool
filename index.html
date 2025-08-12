@@ -334,11 +334,16 @@
 <body>
 
 <header>
-  <div style="display: flex; align-items: center;">
-    <h1>AmitTG NumberTool</h1>
+  <div style="display: box; align-items: center;">
     <button class="theme-toggle" onclick="toggleTheme()">🌓</button>
   </div>
-  <button onclick="copyHeaderText()">Radhe Radhe ❤️‍🔥❤️‍🔥</button>
+  <button onclick="copyHeaderText()">Radhe Radhe❤️‍🔥</button>
+
+<nav>
+  <button class="active" onclick="switchScreen('input', this)">📱(HOME)</button>
+  <button onclick="switchScreen('output', this)">✅ (RESULTS)</button>
+  <button onclick="switchScreen('history', this)">📂(History)</button>
+</nav>
 </header>
 
 <main>
@@ -396,11 +401,6 @@
   </div>
 </main>
 
-<nav>
-  <button class="active" onclick="switchScreen('input', this)">Input</button>
-  <button onclick="switchScreen('output', this)">Output</button>
-  <button onclick="switchScreen('history', this)">History</button>
-</nav>
 
 <div class="toast" id="toast"></div>
 
@@ -409,6 +409,247 @@
   <div class="popup-box">
     <h4>📅 Enter Date Or Bot Number</h4>
     <input type="text" id="dateInput" placeholder="Enter" inputmode="none" readonly onfocus="this.blur()" /><br />
+    <div class="keypad">
+      <button class="keypad-btn" onclick="appendToDate('1')">1</button>
+      <button class="keypad-btn" onclick="appendToDate('2')">2</button>
+      <button class="keypad-btn" onclick="appendToDate('3')">3</button>
+      <button class="keypad-btn" onclick="appendToDate('4')">4</button>
+      <button class="keypad-btn" onclick="appendToDate('5')">5</button>
+      <button class="keypad-btn" onclick="appendToDate('6')">6</button>
+      <button class="keypad-btn" onclick="appendToDate('7')">7</button>
+      <button class="keypad-btn" onclick="appendToDate('8')">8</button>
+      <button class="keypad-btn" onclick="appendToDate('9')">9</button>
+      <button class="keypad-btn" onclick="appendToDate('0')">0</button>
+      <button class="keypad-btn clear" onclick="document.getElementById('dateInput').value = ''">Clear</button>
+    </div>
+    <div class="btn" onclick="saveNumbers()">Save</div>
+  </div>
+</div>
+
+<!-- Confirm Clear Popup -->
+<div class="popup-layer" id="confirmPopup" onclick="hideConfirm(event)">
+  <div class="popup-box">
+    <p>❗ Clear all history?</p>
+    <div style="display: flex; gap: 8px; margin-top: 10px;">
+      <div class="btn" style="background: #dc2626;" onclick="confirmClear()">Yes</div>
+      <div class="btn" style="background: #9ca3af;" onclick="document.getElementById('confirmPopup').style.display = 'none'">No</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Theme management
+  function toggleTheme() {
+    document.body.classList.toggle('dark-mode');
+    localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+  }
+  
+  // Check for saved theme preference
+  if (localStorage.getItem('darkMode') === 'true') {
+    document.body.classList.add('dark-mode');
+  }
+
+  function showToast(msg) {
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.style.display = 'block';
+    setTimeout(() => (toast.style.display = 'none'), 2000);
+  }
+  
+  function copyHeaderText() {
+    navigator.clipboard.writeText('Radhe Radhe');
+    showToast('✅ Copied!');
+  }
+  
+  function animatedCopy(buttonEl, text) {
+    if (!text) return showToast('⚠️ Nothing to copy.');
+
+    navigator.clipboard.writeText(text).then(() => {
+      const originalText = buttonEl.textContent;
+      buttonEl.textContent = '✅ Copied!';
+      buttonEl.disabled = true;
+      setTimeout(() => {
+        buttonEl.textContent = originalText;
+        buttonEl.disabled = false;
+      }, 1500);
+    });
+  }
+  
+  function copyCommaSeparated(type) {
+    let text = '';
+    if (type === 'fresh') {
+      const numbers = document.getElementById('cleanOutput').value.split('\n');
+      text = numbers.join(',');
+    } else if (type === 'dup') {
+      text = document.getElementById('dupPreview').value.split('\n').join(',');
+    } else if (type === 'inv') {
+      text = document.getElementById('invPreview').value.split('\n').join(',');
+    }
+    
+    if (!text) return showToast('⚠️ Nothing to copy.');
+    
+    navigator.clipboard.writeText(text).then(() => {
+      showToast('✅ Copied');
+    });
+  }
+  
+  function processNumbers() {
+    const input = document.getElementById('numberInput').value;
+    const rawNumbers = input.split(/[\s,]+/);
+    const invalid = [],
+      seen = new Set(),
+      duplicates = new Set(),
+      finalCleaned = [];
+    for (let num of rawNumbers) {
+      num = num.replace(/\D/g, '');
+      if (num.length === 10) {
+        if (seen.has(num)) duplicates.add(num);
+        else {
+          seen.add(num);
+          finalCleaned.push(num);
+        }
+      } else if (num.length > 0) {
+        invalid.push(num);
+      }
+    }
+
+    document.getElementById('mainOutput').style.display = 'block';
+
+    // Fresh numbers output - one number per line
+    const cleanNumbers = finalCleaned.join('\n');
+    document.getElementById('cleanOutput').value = cleanNumbers;
+    document.getElementById('cleanCount').textContent = finalCleaned.length;
+    document.getElementById('freshPreview').value = cleanNumbers;
+
+    // Duplicates - one number per line
+    const dupArray = Array.from(duplicates);
+    document.getElementById('dupCount').textContent = dupArray.length;
+    document.getElementById('dupPreview').value = dupArray.join('\n');
+
+    // Invalid - one number per line
+    document.getElementById('invalidCount').textContent = invalid.length;
+    document.getElementById('invPreview').value = invalid.join('\n');
+
+    // Auto switch Output tab
+    switchScreen('output', document.querySelector('nav button:nth-child(2)'));
+  }
+  
+  function switchTab(id) {
+    document.querySelectorAll('.tab-btn').forEach((b) => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach((c) => (c.style.display = 'none'));
+    document.querySelector(`.tab-btn[onclick*="${id}"]`).classList.add('active');
+    document.getElementById(id).style.display = 'block';
+  }
+  
+  function showPopup() {
+    document.getElementById('popup').style.display = 'flex';
+  }
+  
+  function hidePopup(e) {
+    if (e.target.id === 'popup') {
+      document.getElementById('popup').style.display = 'none';
+    }
+  }
+  
+  function appendToDate(num) {
+    const dateInput = document.getElementById('dateInput');
+    dateInput.value += num;
+  }
+  
+  function saveNumbers() {
+    const lines = document.getElementById('numberInput').value.split('\n');
+    const nameLine = lines.find((line) => line.trim().endsWith(':'));
+    const name = nameLine ? nameLine.replace(':', '').trim() : 'Unnamed';
+    const numbers = document.getElementById('cleanOutput').value;
+    let date = document.getElementById('dateInput').value.trim();
+    if (!numbers) return showToast('⚠️ Clean first.');
+    if (!date) {
+      const today = new Date();
+      const monthNames = [
+        'January',
+        'February',
+        'March',
+        'April',
+        'May',
+        'June',
+        'July',
+        'August',
+        'September',
+        'October',
+        'November',
+        'December',
+      ];
+      date = `${today.getDate()} ${monthNames[today.getMonth()]}`;
+    }
+    const entry = { name, date, numbers, total: numbers.split('\n').length };
+    const history = JSON.parse(localStorage.getItem('history') || '[]');
+    history.unshift(entry);
+    localStorage.setItem('history', JSON.stringify(history));
+    showToast('✅ Saved!');
+    document.getElementById('popup').style.display = 'none';
+    document.getElementById('dateInput').value = '';
+    loadHistory();
+  }
+  
+  function loadHistory() {
+    const history = JSON.parse(localStorage.getItem('history') || '[]');
+    const container = document.getElementById('historyList');
+    container.innerHTML = '';
+    if (!history.length) {
+      container.innerHTML = '<i>No history</i>';
+      return;
+    }
+    history.forEach((item) => {
+      const div = document.createElement('div');
+      div.className = 'history-item';
+      
+      // Create comma-separated numbers for copying
+      const commaNumbers = item.numbers.split('\n').join(',');
+      
+      div.innerHTML = `
+        <div>
+          <span class="history-total">${item.total}</span> - ${item.name} (${item.date})
+        </div>
+        <button class="copy-btn" onclick="animatedCopy(this, '${commaNumbers.replace(/'/g, "\\'")}')">
+          Copy
+        </button>
+      `;
+      container.appendChild(div);
+    });
+  }
+  
+  function hideConfirm(e) {
+    if (e.target.id === 'confirmPopup') {
+      document.getElementById('confirmPopup').style.display = 'none';
+    }
+  }
+  
+  function confirmClear() {
+    localStorage.removeItem('history');
+    showToast('🗑️ History cleared!');
+    document.getElementById('confirmPopup').style.display = 'none';
+    loadHistory();
+  }
+  
+  function switchScreen(name, btn) {
+    document.querySelectorAll('nav button').forEach((b) => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.screen').forEach((s) => s.classList.remove('active'));
+    document.getElementById(`screen-${name}`).classList.add('active');
+  }
+  
+  window.onload = () => {
+    loadHistory();
+    
+    // Prevent mobile keyboard from showing on date input
+    document.getElementById('dateInput').addEventListener('focus', function(e) {
+      e.preventDefault();
+      this.blur();
+    });
+  };
+</script>
+</body>
+</html> onfocus="this.blur()" /><br />
     <div class="keypad">
       <button class="keypad-btn" onclick="appendToDate('1')">1</button>
       <button class="keypad-btn" onclick="appendToDate('2')">2</button>
